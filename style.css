@@ -1,0 +1,15 @@
+*{
+    box-sizing: border-box;
+}
+.container{
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    grid-template-rows: repeat(3,1fr);
+    flex-grow: 1;
+}
+body{
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
