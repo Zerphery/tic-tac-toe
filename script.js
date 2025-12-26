@@ -29,64 +29,8 @@ function Gameboard(){
         }
         return {setState,getState};
     }
-    function makeMove(x,y){
-        if(res!=0){
-            return;
-        }
-        if(board[y][x].getState()==0){
-            if(turn%2==0){
-                board[y][x].setState(1);
-            }else{
-                board[y][x].setState(2);
-            }
-            turn+=1;
-        }
-        return checkResult();
-    }
-    function checkResult(){
-        for(let i=0;i<rows;i++){
-            let x=getState(i,0);
-            for(let j=0;j<columns;j++){
-                if(getState(i,j)!=x){
-                    x=0;
-                }
-            }
-            if(x!=0){
-                res=x;
-            }
-        }
-        for(let i=0;i<columns;i++){
-            let x=getState(0,i);
-            for(let j=0;j<rows;j++){
-                if(getState(j,i)!=x){
-                    x=0;
-                }
-            }
-            if(x!=0){
-                res=x;
-            }
-        }
-        let x=getState(0,0);
-        for(let i=0;i<columns;i++){
-            if(getState(i,i)!=x){
-                x=0;
-            }
-        }
-        if(x!=0){
-            res=x;
-        }
-        x=getState(rows-1,0);
-        for(let i=0;i<columns;i++){
-            if(getState(rows-1-i,i)!=x){
-                x=0;
-            }
-        }
-        if(x!=0){
-            res=x;
-        }
-        return res;
-    }
-    return {setState,getState,rows,columns,makeMove};
+        
+    return {setState,getState,rows,columns};
 }
 function displayGameboard(gameboard){
     const container=document.querySelector(".container");
@@ -94,7 +38,7 @@ function displayGameboard(gameboard){
         for(let j=0;j<gameboard.columns;j++){
             const button=document.createElement("button");
             button.addEventListener("click",(event)=>{
-                const res=gameboard.makeMove(j,i);
+                const res=gameController.makeMove(i,j);
                 if(res!=0){
                     displayResult(res);
                 }
@@ -112,12 +56,15 @@ function displayGameboard(gameboard){
         }
     }
 }
-const resetButton=document.querySelector("#reset");
-resetButton.addEventListener("click",(event)=>{
-    const result=document.querySelector("h2");
-    result.textContent="";
-    reset();
-});
+const displayController=(function displayController(){
+    const resetButton=document.querySelector("#reset");
+    resetButton.addEventListener("click",(event)=>{
+        const result=document.querySelector("h2");
+        result.textContent="";
+        gameController.reset();
+    });
+})();
+
 function displayResult(result){
     const display=document.querySelector("h2");
     const name1=document.querySelector("#player1");
@@ -128,13 +75,80 @@ function displayResult(result){
         display.textContent=name2.value+" won";
     }
 }
-var gameboard=new Gameboard();
-displayGameboard(gameboard);
-function reset(){
-    const container=document.querySelector(".container");
-    while(container.firstChild){
-        container.removeChild(container.firstChild);
-    }
-    gameboard=new Gameboard();
+const gameController=(function gameController(){
+    let gameboard=new Gameboard();
+    let turn=0;
+    const rows=gameboard.rows;
+    const columns=gameboard.columns;
     displayGameboard(gameboard);
-}
+    function reset(){
+        const container=document.querySelector(".container");
+        while(container.firstChild){
+            container.removeChild(container.firstChild);
+        }
+        gameboard=new Gameboard();
+        displayGameboard(gameboard);
+    }
+    let res=0;
+    function checkResult(){
+        for(let i=0;i<rows;i++){
+            let x=gameboard.getState(i,0);
+            for(let j=0;j<columns;j++){
+                if(gameboard.getState(i,j)!=x){
+                    x=0;
+                }
+            }
+            if(x!=0){
+                res=x;
+            }
+        }
+        for(let i=0;i<columns;i++){
+            let x=gameboard.getState(0,i);
+            for(let j=0;j<rows;j++){
+                if(gameboard.getState(j,i)!=x){
+                    x=0;
+                }
+            }
+            if(x!=0){
+                res=x;
+            }
+        }
+        let x=gameboard.getState(0,0);
+        for(let i=0;i<columns;i++){
+            if(gameboard.getState(i,i)!=x){
+                x=0;
+            }
+        }
+        if(x!=0){
+            res=x;
+        }
+        x=gameboard.getState(rows-1,0);
+        for(let i=0;i<columns;i++){
+            if(gameboard.getState(rows-1-i,i)!=x){
+                x=0;
+            }
+        }
+        if(x!=0){
+            res=x;
+        }
+        return res;
+    }
+    function makeMove(x,y){
+        if(res!=0){
+            return;
+        }
+        if(gameboard.getState(y,x)==0){
+            if(turn%2==0){
+                gameboard.setState(y,x,1);
+            }else{
+                gameboard.setState(y,x,2);
+            }
+            turn+=1;
+        }
+        return checkResult();
+    }
+    function getTurn(){
+        return turn;
+    }
+    return {makeMove,getTurn,reset};
+}());
